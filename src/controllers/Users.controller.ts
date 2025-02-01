@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/Users.mongo";
 import asyncHandler from "../middlewares/tryCatch";
 import { CustomError } from "../middlewares/errors/CustomError";
+import { JWT_SECRET_KEY } from "../helpers/envConfig";
 
 import { NextFunction, Request, Response } from "express";
 
@@ -24,7 +25,7 @@ export const loginUser = asyncHandler(
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) throw new CustomError("Authentication failed", 401);
 
-    const token = jwt.sign({ userId: user._id }, "your-secret-key", {
+    const token = jwt.sign({ userId: user._id }, JWT_SECRET_KEY, {
       expiresIn: "1h",
     });
     res.status(200).json({ token });
