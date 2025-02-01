@@ -21,9 +21,9 @@ export const loginUser = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const { email, password } = req.body;
     const user = await User.findOne({ email });
-    if (!user) throw new CustomError("Authentication failed", 401);
+    if (!user) throw new CustomError("User not found", 401);
     const passwordMatch = await bcrypt.compare(password, user.password);
-    if (!passwordMatch) throw new CustomError("Authentication failed", 401);
+    if (!passwordMatch) throw new CustomError("Incorrect password", 401);
 
     const token = jwt.sign({ userId: user._id }, JWT_SECRET_KEY, {
       expiresIn: "1h",

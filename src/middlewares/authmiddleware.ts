@@ -11,7 +11,6 @@ interface JwtPayload {
 export const verifyToken = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
     const token = req.headers.authorization?.split(" ")[1];
-    console.log(token);
     if (!token) throw new CustomError("Access denied", 401);
     const decoded = jwt.verify(token, JWT_SECRET_KEY) as JwtPayload;
     req.userId = decoded.userId;
