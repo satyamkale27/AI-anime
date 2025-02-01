@@ -9,9 +9,20 @@ import { NextFunction, Request, Response } from "express";
 
 export const registerUser = asyncHandler(
   async (req: Request, res: Response) => {
-    const { email, password } = req.body;
+    const { fullName, userName, email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ email, password: hashedPassword });
+
+    const findUser = await User.findOne({ userName });
+    console.log(findUser);
+    if (findUser?.userName === userName)
+      throw new CustomError("userName already exists", 409);
+    const user = new User({
+      fullName,
+      userName,
+      email,
+      password: hashedPassword,
+    });
+
     await user.save();
     res.status(201).json({ message: "User registered successfully" });
   }
