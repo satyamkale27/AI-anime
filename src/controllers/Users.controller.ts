@@ -8,19 +8,18 @@ import { NextFunction, Request, Response } from "express";
 
 export const registerUser = asyncHandler(
   async (req: Request, res: Response) => {
-    const { username, password } = req.body;
+    const { email, password } = req.body;
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = new User({ username, password: hashedPassword });
+    const user = new User({ email, password: hashedPassword });
     await user.save();
-    if (!user) throw new CustomError("unable to register", 500);
     res.status(201).json({ message: "User registered successfully" });
   }
 );
 
 export const loginUser = asyncHandler(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { username, password } = req.body;
-    const user = await User.findOne({ username });
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
     if (!user) throw new CustomError("Authentication failed", 401);
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) throw new CustomError("Authentication failed", 401);
