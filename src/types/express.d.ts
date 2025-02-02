@@ -11,7 +11,5 @@ declare module "express-serve-static-core" {
 declare namespace Express {
   export interface MulterS3File extends File {
     key: string; // The S3 file key in the bucket
-    // location: string; // The public URL of the uploaded file
-    // bucket: string; // The S3 bucket name
   }
 }
