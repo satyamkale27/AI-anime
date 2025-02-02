@@ -3,10 +3,19 @@ import jwt from "jsonwebtoken";
 import User from "../models/Users.mongo";
 import asyncHandler from "../middlewares/tryCatch";
 import { CustomError } from "../middlewares/errors/CustomError";
-import { AWS_BUCKET_NAME, JWT_SECRET_KEY, PROFILE_URL } from "../helpers/envConfig";
+import {
+  AWS_BUCKET_NAME,
+  JWT_SECRET_KEY,
+  PROFILE_URL,
+} from "../helpers/envConfig";
 import { NextFunction, Request, Response } from "express";
 import { generateToken } from "../helpers/jwt";
-import { checkUserExists, getMediasUrls, getProfileImage, getUniqueMediaName } from "../helpers/utils";
+import {
+  checkUserExists,
+  getMediasUrls,
+  getProfileImage,
+  getUniqueMediaName,
+} from "../helpers/utils";
 import { uploadToS3 } from "../helpers/s3";
 
 const generateUsername = (fullName: string) => {
@@ -42,7 +51,6 @@ const generateUsername = (fullName: string) => {
 
 export const registerUser = asyncHandler(
   async (req: Request, res: Response) => {
-    
     const { fullName, userName, email, password } = req.body;
 
     if (!fullName || !userName || !email || !password) {
@@ -64,13 +72,18 @@ export const registerUser = asyncHandler(
       userName,
       email,
       password: hashedPassword,
-      profileImage
+      profileImage,
     });
 
     await Promise.all([
-      uploadToS3(AWS_BUCKET_NAME, profileImage, req.file.buffer, req.file.mimetype),
-      user.save()
-    ])
+      uploadToS3(
+        AWS_BUCKET_NAME,
+        profileImage,
+        req.file.buffer,
+        req.file.mimetype
+      ),
+      user.save(),
+    ]);
 
     const userResponse = {
       id: user._id,
@@ -80,7 +93,13 @@ export const registerUser = asyncHandler(
       profileImage: getMediasUrls(PROFILE_URL, user.profileImage),
     };
 
-    res.status(201).json({ success: true, message: "User registered successfully", user: userResponse });
+    res
+      .status(201)
+      .json({
+        success: true,
+        message: "User registered successfully",
+        user: userResponse,
+      });
   }
 );
 
@@ -95,7 +114,7 @@ export const loginUser = asyncHandler(
     if (!passwordMatch) throw new CustomError("Incorrect password", 401);
 
     const data = {
-      id: user._id as string,
+      id: user.id as string,
       fullName: user.fullName,
       userName: user.userName,
       email: user.email,
@@ -105,9 +124,9 @@ export const loginUser = asyncHandler(
         user.profileImage
       ),
     };
-    const token = generateToken(data)
+    const token = generateToken(data);
 
-    res.status(200).json({ token, user: data, success: true, });
+    res.status(200).json({ token, user: data, success: true });
   }
 );
 
@@ -150,6 +169,6 @@ export const googleLogin = asyncHandler(async (req: Request, res: Response) => {
       email: newUser.email,
     };
     const token = generateToken(data);
-    res.status(200).json({ token, user: data, success: true, });
+    res.status(200).json({ token, user: data, success: true });
   }
 });
