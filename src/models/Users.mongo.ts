@@ -13,7 +13,7 @@ const userSchema: Schema = new mongoose.Schema({
   fullName: { type: String, required: true },
   userName: { type: String, unique: true, required: true },
   email: { type: String, unique: true, required: true },
-  password: { type: String, required: true },
+  password: { type: String },
   profileImage: { type: String, required: true },
   isGoogleUser: { type: Boolean, default: false },
 });
