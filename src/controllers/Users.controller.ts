@@ -4,7 +4,6 @@ import asyncHandler from "../middlewares/tryCatch";
 import { CustomError } from "../middlewares/errors/CustomError";
 import { AWS_BUCKET_NAME, PROFILE_URL } from "../helpers/envConfig";
 import { NextFunction, Request, Response } from "express";
-import { generateToken } from "../helpers/jwt";
 import { checkUserExists, getMediasUrls, getProfileImage, getUniqueMediaName } from "../helpers/utils";
 import { uploadToS3 } from "../helpers/s3";
 
@@ -84,9 +83,8 @@ export const loginUser = asyncHandler(
         user.profileImage
       ),
     };
-    const token = generateToken(data)
 
-    res.status(200).json({ token, user: data, success: true, });
+    res.status(200).json({ user: data, success: true });
   }
 );
 
@@ -109,8 +107,8 @@ export const googleLogin = asyncHandler(async (req: Request, res: Response) => {
       ),
       email: user.email,
     };
-    const token = generateToken(data);
-    res.status(200).json({ token, user: data });
+   
+    res.status(200).json({ succcess: true, user: data });
   } else {
     const userName = generateUsername(fullName);
 
@@ -129,7 +127,7 @@ export const googleLogin = asyncHandler(async (req: Request, res: Response) => {
       profileImage: image,
       email: newUser.email,
     };
-    const token = generateToken(data);
-    res.status(200).json({ token, user: data, success: true, });
+   
+    res.status(200).json({ user: data, success: true });
   }
 });
