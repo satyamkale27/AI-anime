@@ -1,48 +1,26 @@
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
 import User from "../models/Users.mongo";
 import asyncHandler from "../middlewares/tryCatch";
 import { CustomError } from "../middlewares/errors/CustomError";
-import { AWS_BUCKET_NAME, JWT_SECRET_KEY, PROFILE_URL } from "../helpers/envConfig";
+import { AWS_BUCKET_NAME, PROFILE_URL } from "../helpers/envConfig";
 import { NextFunction, Request, Response } from "express";
-import { generateToken } from "../helpers/jwt";
 import { checkUserExists, getMediasUrls, getProfileImage, getUniqueMediaName } from "../helpers/utils";
 import { uploadToS3 } from "../helpers/s3";
 
 const generateUsername = (fullName: string) => {
+  if (!fullName) {
+    throw new Error('Full name is required');
+  }
+
   let username = fullName.toLowerCase().replace(/\s+/g, "").replace(/_/g, "");
   const randomNum = Math.floor(Math.random() * 100);
   username += randomNum;
   return username;
 };
 
-// export const registerUser = asyncHandler(async (req: Request, res: Response) => {
-//   const { fullName, userName, email, password } = req.body;
-
-//   if (!req.file) {
-//     throw new CustomError("Profile image is required", 400);
-//   }
-
-//   const hashedPassword = await bcrypt.hash(password, 10);
-
-//   const findUser = await User.findOne({ userName });
-//   if (findUser?.userName === userName)
-//     throw new CustomError("userName already exists", 409);
-//   const user = new User({
-//     fullName,
-//     userName,
-//     email,
-//     password: hashedPassword,
-//     // profileImage: ,
-//   });
-
-//   await user.save();
-//   res.status(201).json({ message: "User registered successfully" });
-// })
-
 export const registerUser = asyncHandler(
   async (req: Request, res: Response) => {
-    
+
     const { fullName, userName, email, password } = req.body;
 
     if (!fullName || !userName || !email || !password) {
@@ -105,9 +83,8 @@ export const loginUser = asyncHandler(
         user.profileImage
       ),
     };
-    const token = generateToken(data)
 
-    res.status(200).json({ token, user: data, success: true, });
+    res.status(200).json({ user: data, success: true });
   }
 );
 
@@ -130,8 +107,8 @@ export const googleLogin = asyncHandler(async (req: Request, res: Response) => {
       ),
       email: user.email,
     };
-    const token = generateToken(data);
-    res.status(200).json({ token, user: data });
+   
+    res.status(200).json({ succcess: true, user: data });
   } else {
     const userName = generateUsername(fullName);
 
@@ -140,6 +117,7 @@ export const googleLogin = asyncHandler(async (req: Request, res: Response) => {
       fullName,
       profileImage: image,
       userName,
+      isGoogleUser: true
     });
     await newUser.save();
     const data = {
@@ -149,7 +127,7 @@ export const googleLogin = asyncHandler(async (req: Request, res: Response) => {
       profileImage: image,
       email: newUser.email,
     };
-    const token = generateToken(data);
-    res.status(200).json({ token, user: data, success: true, });
+   
+    res.status(200).json({ user: data, success: true });
   }
 });
